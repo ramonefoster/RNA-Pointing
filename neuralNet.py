@@ -32,8 +32,8 @@ def save_train_test():
    
 
 def train():
-    rna = MLPRegressor(hidden_layer_sizes=(15, 10), max_iter=3000, tol=0.0000001, 
-                    learning_rate_init=0.1, solver="sgd", activation="logistic", 
+    rna = MLPRegressor(hidden_layer_sizes=(200, 200), max_iter=2000, tol=0.0000001, 
+                    learning_rate_init=0.01, solver="adam", activation="relu", 
                     learning_rate="constant", verbose=2)    
 
     with open('obs_train_test.pkl', mode='rb') as f:
@@ -54,9 +54,6 @@ def train():
 
 def make_predict(ah=None, dec=None, temp=None ):
     rna = joblib.load('NNmodel.pkl')
-
-    with open('obs_train_test.pkl', mode='rb') as f:
-        X_norm_train, X_norm_test, y_train, y_teste = pickle.load(f)
 
     #PREVISAO
     az, elevation = calcAzimuthAltura(ah,dec)
@@ -99,6 +96,6 @@ def calcAzimuthAltura(ah, dec):
 
     return(azimuth, elevation)
 
-save_train_test()
-train()
-# make_predict(-1.375, -53.7256, 12)
+#save_train_test()
+#train()
+make_predict(-1.375, -53.7256, 12)
