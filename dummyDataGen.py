@@ -5,7 +5,7 @@ from random import uniform
 from pathlib import Path
 
 def create_file():
-    """Creates new mapping file"""
+    """Cria novo arquivo CSV com Header"""
     headerList = ['ah_star', 'dec_star', 'ah_scope', 'dec_scope', 'err_ah', 'err_dec', 'elevation', 'azimuth', 'temperature']
 
     with open(f"dataset.csv", 'w') as file:
@@ -14,6 +14,16 @@ def create_file():
         dw.writeheader()
 
 def save_dataframe(ah_star, dec_star, ah_scope, dec_scope, azimuth, elevation, temperature):
+    """
+    Salva dados no arquivo CSV.
+    :param ah_star: Angulo Horario real da estrela
+    :param dec_star: Declinacao real da estrela
+    :param ah_scope: Angulo Horario do telescopio
+    :param dec_scope: Declinacao do telescopio
+    :param azimuth: Azimuth do telescopio
+    :param elevation: Elevacao do telescopio
+    :param temperatura: Temperatura interna da cupula
+    """
     path_file = Path('dataset.csv')
     if not path_file.is_file():
         create_file()
@@ -52,7 +62,13 @@ def gen_dummy_data():
             save_dataframe(ah_star, dec_star, ah_scope, dec_scope, azimuth, elevation, temperature)
 
 def calcAzimuthAltura(ah, dec):
-    """Calculates Azimuth and Zenith"""
+    """
+    Calcula Azimuth e Elevacao
+    :Param ah: Angulo Horario do alvo ()
+    :Param dec: Declinacao do alvo 
+    :Param temp: Temperatura Graus Centigrados
+    :return: Azimuth e Elevacao (em graus)
+    """
     DEG = 180 / np.pi
     RAD = np.pi / 180.0
     H = ah * 15

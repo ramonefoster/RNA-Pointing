@@ -9,6 +9,10 @@ import pickle
 import joblib
 
 def read_data():
+    """
+    Le o arquivo CSV e separa as variaveis de interesse.
+    :return: Dataframes X, Y
+    """
     dataframe = pd.read_csv("dataset.csv")
 
     X = dataframe[["azimuth", "elevation", "ah_star", "dec_star", "temperature"]]
@@ -18,6 +22,9 @@ def read_data():
     return X, Y
 
 def save_train_test():
+    """
+    Separa variaveis de treinamento e teste e guarda em um arquivo pickle
+    """
     #Normalizacao
     X, Y = read_data()
     escala = StandardScaler()
@@ -32,6 +39,12 @@ def save_train_test():
    
 
 def train():
+    """
+    Realiza o Treinamento da Rede Neural, e guarda o modelo gerado em um arquivo pkl
+    """
+    # Melhores parametros foram calculados no kaggle
+    # https://www.kaggle.com/ramoncarlos/definicao-de-hyperparams-para-rna-tcs40/edit
+
     rna = MLPRegressor(hidden_layer_sizes=(200, 200), max_iter=2000, tol=0.0000001, 
                     learning_rate_init=0.01, solver="adam", activation="relu", 
                     learning_rate="constant", verbose=2)    
@@ -41,18 +54,25 @@ def train():
 
     # #Processamento    
     rna.fit(X_norm_train, y_train)
-    #save trained model to file
-    # with open('NNmodel.pkl', mode='wb') as f:
-    #     pickle.dump([rna], f)
+    # Guarda modelo no arquivo pck
     joblib.dump(rna, 'NNmodel.pkl')
 
+    #Informa o coefficient of determination
     Y_rna_previsao = rna.predict(X_norm_test)
-
-    r2_rna = r2_score(y_teste, Y_rna_previsao)
+    r2_rna = r2_score(y_teste, Y_rna_previsao) 
+    # valores negativos informam que o modelo nao foi bem modelado
     print("Aproximacao dos dados reais:")
     print(r2_rna)
+    if r2_rna<0:
+        print("Valores negativos informam que o modelo nao foi bem modelado")
 
 def make_predict(ah=None, dec=None, temp=None ):
+    """
+    :param ah: Angulo Horario do alvo ()
+    :param dec: Declinacao do alvo 
+    :param temp: Temperatura Graus Centigrados
+    :return: AH e DEC previstos
+    """
     rna = joblib.load('NNmodel.pkl')
 
     #PREVISAO
@@ -66,18 +86,23 @@ def make_predict(ah=None, dec=None, temp=None ):
     Y_rna_prever_futuro = rna.predict(X_futuro_norm)
     fator_correct_ah = Y_rna_prever_futuro[0][0]
     fator_correct_dec = Y_rna_prever_futuro[0][1]
+
+    new_ah = ah+fator_correct_ah
+    new_dec = dec+fator_correct_dec
+
     print("AH SCOPE: ", ah, "DEC SCOPE: ", dec)
     print("CORRECTED COORDINATES: ")
-    print("AH: ", ah+fator_correct_ah, "DEC:", dec+fator_correct_dec)
-
-    # plt.scatter(X, Y)
-    # plt.xlabel("Azimuth (deg)")
-    # plt.ylabel("Erro em AH (minarc)")
-    # plt.title("Relacao Erro Ah e Azimuth")
-    # plt.show()
+    print("AH: ", new_ah, "DEC:", new_dec)
+    return (new_ah, new_dec)
 
 def calcAzimuthAltura(ah, dec):
-    """Calculates Azimuth and Zenith"""
+    """
+    Calcula Azimuth e Elevacao
+    :Param ah: Angulo Horario do alvo ()
+    :Param dec: Declinacao do alvo 
+    :Param temp: Temperatura Graus Centigrados
+    :return: Azimuth e Elevacao (em graus)
+    """
     DEG = 180 / np.pi
     RAD = np.pi / 180.0
     H = ah * 15
@@ -98,4 +123,4 @@ def calcAzimuthAltura(ah, dec):
 
 #save_train_test()
 #train()
-make_predict(-1.375, -53.7256, 12)
+make_predict(ah=-1.375, dec=-53.7256, temp=12)
