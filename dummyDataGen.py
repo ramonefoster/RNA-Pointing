@@ -32,9 +32,20 @@ def save_dataframe(ah_star, dec_star, ah_scope, dec_scope, azimuth, elevation, t
 def gen_dummy_data():
     for i in range(1,100):
         ah_star = uniform(-6, 6)
-        ah_scope = ah_star + uniform(-0.05, 0.07)
         dec_star = uniform(-88.4, 43)
-        dec_scope = dec_star + uniform(-0.11, 0.15)
+        #separa por quadrantes
+        if ah_star < 0 and dec_star > -22.5433: 
+            ah_scope = ah_star + uniform(-0.05, -0.02)
+            dec_scope = dec_star + uniform(-0.16, -0.09)
+        if ah_star < 0 and dec_star <= -22.5433: 
+            ah_scope = ah_star + uniform(-0.03, -0.01)
+            dec_scope = dec_star + uniform(0.11, 0.15)
+        if ah_star >= 0 and dec_star > -22.5433: 
+            ah_scope = ah_star + uniform(0.02, 0.05)
+            dec_scope = dec_star + uniform(-0.16, -0.09)
+        if ah_star >= 0 and dec_star <= -22.5433: 
+            ah_scope = ah_star + uniform(0.01, 0.035)
+            dec_scope = dec_star + uniform(0.11, 0.07)
         temperature = uniform(4, 16)
         azimuth, elevation = calcAzimuthAltura(ah_scope, dec_scope)
         if elevation > 10:
@@ -60,5 +71,5 @@ def calcAzimuthAltura(ah, dec):
 
     return(azimuth, elevation)
 
-
+create_file()
 gen_dummy_data()
